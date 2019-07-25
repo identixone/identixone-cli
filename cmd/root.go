@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/identixone/identixone-go/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -14,10 +15,21 @@ var (
 	idxid      string
 	faceSize   int
 	sourceName string
+	token      string
+	debug      bool
 )
 var rootCmd = &cobra.Command{
 	Use:   "identixone",
 	Short: "Identix.one is a real-time cloud-based facial recognition platform for businesses.",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		if token != "" {
+			ifErrorExit(os.Setenv("IDENTIXONE_TOKEN", token))
+		}
+		if debug {
+			ifErrorExit(os.Setenv("IDENTIXONE_DEBUG", fmt.Sprintf("%v", debug)))
+			utils.Warn().Msgf("%v", os.Environ())
+		}
+	},
 	Long: `
 
 
@@ -50,6 +62,8 @@ func printAndExit(err string) {
 }
 
 func Execute() {
+	rootCmd.PersistentFlags().BoolVar(&debug, "debug", false, "debug cli and client")
+	rootCmd.PersistentFlags().StringVar(&token, "token", "", "identix.one API token")
 	rootCmd.PersistentFlags().StringVarP(&outputPath, "output", "o", "", "path to file for writing output result")
 	rootCmd.PersistentFlags().IntVar(&limit, "limit", 20, "the number of output items, maximum 1000 entries per request")
 	rootCmd.PersistentFlags().IntVar(&offset, "offset", 0, "a sequential number of an output item, to return a sampling after this one")

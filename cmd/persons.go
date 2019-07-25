@@ -69,7 +69,6 @@ Searching person with liveness and asm:
 				SetCreateLivenessOnly(createOnlyLiveness).
 				SetCreateOnHa(createOnHa).
 				SetCreateOnJunk(createOnJunk)
-			//fmt.Printf("%+v\n", cp)
 			c, err := client.NewClient()
 			ifErrorExit(err)
 			person, err := c.Persons().Create(cp)
@@ -102,7 +101,7 @@ Searching person with liveness and asm:
 			if reinitId == 0 {
 				printAndExit("missing id for reinit.")
 			}
-			req := person.ReinitIdRequest{Id: reinitId}
+			req := person.ReinitIdRequest{ID: reinitId}
 			if faceSize != 0 {
 				req.Facesize = faceSize
 			}
@@ -119,7 +118,7 @@ Searching person with liveness and asm:
 				printAndExit("idxid is required.")
 			}
 
-			req, err := person.NewReinitImageRequest(photoPath, idxid)
+			req, err := person.NewReinitImageRequest(photoPath, idxid, sourceName)
 			ifErrorExit(err)
 
 			req.SetFacesize(faceSize).SetLiveness(liveness).SetReinitLivenessOnly(livenessOnly)

@@ -19,6 +19,7 @@ import (
 
 	"github.com/identixone/identixone-go/api/client"
 	"github.com/identixone/identixone-go/api/common"
+	//"github.com/identixone/identixone-go/api/source"
 	"github.com/identixone/identixone-go/utils"
 	"github.com/spf13/cobra"
 )
@@ -32,8 +33,28 @@ const (
 )
 
 var (
-	q        string
-	sourceId int
+	q                             string
+	sourceId                      int
+	identityFacesizeThreshold     *int
+	manualCreateFacesizeThreshold *int
+	autoCreateFacesizeThreshold   *int
+	autoCheckAngleThreshold       *int
+	storeImagesForConfs           *[]string
+	ppsTimestamp                  *bool
+	autoCreatePerson              *bool
+	autoCreateOnHa                *bool
+	autoCreateOnJunk              *bool
+	autoCheckFaceAngel            *bool
+	autoCheckAsm                  *bool
+	autoCreateCheckBlur           *bool
+	autoCreateCheckExp            *bool
+	autoCheckLiveness             *bool
+	autoCreateLivenessOnly        *bool
+	manualCreateOnHa              *bool
+	manualCreateOnJunk            *bool
+	manualCheckAsm                *bool
+	manualCreateLivenessOnly      *bool
+	manualCheckLiveness           *bool
 )
 
 //func get
@@ -85,6 +106,15 @@ var sourcesCmd = &cobra.Command{
 			source, err := c.Sources().Get(sourceId)
 			ifErrorExit(err)
 			ifErrorExit(utils.PrettyPrint(source))
+		case sourcesUpdate:
+			if sourceId == 0 {
+				printAndExit("source id is required")
+			}
+			//c, err := client.NewClient()
+			//ifErrorExit(err)
+			//
+			//req := source.DefaultSource()
+
 		}
 	},
 }
@@ -92,5 +122,21 @@ var sourcesCmd = &cobra.Command{
 func init() {
 	sourcesCmd.Flags().StringVarP(&q, "search", "s", "", "filtering of a source sourcesList by partly or fully specified name")
 	sourcesCmd.Flags().IntVar(&sourceId, "id", 0, "source id")
+	//sourcesCmd.Flags().
+	//sourcesCmd.Flags().BoolVar(ppsTimestamp, "ppsTimestamp", nil, "ppsTimestamp")
+	//sourcesCmd.Flags().BoolVar(autoCreatePerson, "autoCreatePerson", nil, "autoCreatePerson")
+	//sourcesCmd.Flags().BoolVar(autoCreateOnHa, "autoCreateOnHa", nil, "autoCreateOnHa")
+	//sourcesCmd.Flags().BoolVar(autoCreateOnJunk, "autoCreateOnJunk", nil, "autoCreateOnJunk")
+	//sourcesCmd.Flags().BoolVar(autoCheckFaceAngel, "autoCheckFaceAngel", nil, "autoCheckFaceAngel")
+	//sourcesCmd.Flags().BoolVar(autoCheckAsm, "autoCheckAsm", nil, "autoCheckAsm")
+	//sourcesCmd.Flags().BoolVar(autoCreateCheckBlur, "autoCreateCheckBlur", nil, "autoCreateCheckBlur")
+	//sourcesCmd.Flags().BoolVar(autoCreateCheckExp, "autoCreateCheckExp", nil, "autoCreateCheckExp")
+	//sourcesCmd.Flags().BoolVar(autoCheckLiveness, "autoCheckLiveness", nil, "autoCheckLiveness")
+	//sourcesCmd.Flags().BoolVar(autoCreateLivenessOnly, "autoCreateLivenessOnly", nil, "autoCreateLivenessOnly")
+	//sourcesCmd.Flags().BoolVar(manualCreateOnHa, "manualCreateOnHa", nil, "manualCreateOnHa")
+	//sourcesCmd.Flags().BoolVar(manualCreateOnJunk, "manualCreateOnJunk", nil, "manualCreateOnJunk")
+	//sourcesCmd.Flags().BoolVar(manualCheckAsm, "manualCheckAsm", nil, "manualCheckAsm")
+	//sourcesCmd.Flags().BoolVar(manualCreateLivenessOnly, "manualCreateLivenessOnly", nil, "manualCreateLivenessOnly")
+	//sourcesCmd.Flags().BoolVar(manualCheckLiveness, "manualCheckLiveness", nil, "manualCheckLiveness")
 	rootCmd.AddCommand(sourcesCmd)
 }
