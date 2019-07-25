@@ -19,7 +19,8 @@ import (
 
 	"github.com/identixone/identixone-go/api/client"
 	"github.com/identixone/identixone-go/api/common"
-	//"github.com/identixone/identixone-go/api/source"
+	"github.com/identixone/identixone-go/api/const/conf"
+	"github.com/identixone/identixone-go/api/source"
 	"github.com/identixone/identixone-go/utils"
 	"github.com/spf13/cobra"
 )
@@ -35,26 +36,27 @@ const (
 var (
 	q                             string
 	sourceId                      int
-	identityFacesizeThreshold     *int
-	manualCreateFacesizeThreshold *int
-	autoCreateFacesizeThreshold   *int
-	autoCheckAngleThreshold       *int
-	storeImagesForConfs           *[]string
-	ppsTimestamp                  *bool
-	autoCreatePerson              *bool
-	autoCreateOnHa                *bool
-	autoCreateOnJunk              *bool
-	autoCheckFaceAngel            *bool
-	autoCheckAsm                  *bool
-	autoCreateCheckBlur           *bool
-	autoCreateCheckExp            *bool
-	autoCheckLiveness             *bool
-	autoCreateLivenessOnly        *bool
-	manualCreateOnHa              *bool
-	manualCreateOnJunk            *bool
-	manualCheckAsm                *bool
-	manualCreateLivenessOnly      *bool
-	manualCheckLiveness           *bool
+	identifyFacesizeThreshold     int
+	manualCreateFacesizeThreshold int
+	autoCreateFacesizeThreshold   int
+	autoCheckAngleThreshold       int
+	storeImagesForConfs           []conf.Conf
+	storeImagesForConfsStrings    []string
+	ppsTimestamp                  bool
+	autoCreatePerson              bool
+	autoCreateOnHa                bool
+	autoCreateOnJunk              bool
+	autoCheckFaceAngle            bool
+	autoCheckAsm                  bool
+	autoCreateCheckBlur           bool
+	autoCreateCheckExp            bool
+	autoCheckLiveness             bool
+	autoCreateLivenessOnly        bool
+	manualCreateOnHa              bool
+	manualCreateOnJunk            bool
+	manualCheckAsm                bool
+	manualCreateLivenessOnly      bool
+	manualCheckLiveness           bool
 )
 
 //func get
@@ -72,7 +74,11 @@ var sourcesCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		//fmt.Println(args)
-
+		if len(storeImagesForConfsStrings) > 0 {
+			for i := range storeImagesForConfsStrings {
+				storeImagesForConfs = append(storeImagesForConfs, conf.Conf(storeImagesForConfsStrings[i]))
+			}
+		}
 		switch args[0] {
 		case sourcesList:
 			query := common.NewSearchPaginationQuery(q, limit, offset)
@@ -110,11 +116,70 @@ var sourcesCmd = &cobra.Command{
 			if sourceId == 0 {
 				printAndExit("source id is required")
 			}
-			//c, err := client.NewClient()
-			//ifErrorExit(err)
-			//
-			//req := source.DefaultSource()
+			c, err := client.NewClient()
+			ifErrorExit(err)
 
+			req := source.UpdateRequest{ID: sourceId}
+			req.
+				SetPpsTimestamp(ppsTimestamp).
+				SetStoreImagesForConfs(storeImagesForConfs).
+				SetName(sourceName).
+				SetIdentifyFacesizeThreshold(identifyFacesizeThreshold).
+				SetAutoCreatePersons(autoCreatePerson).
+				SetAutoCreateFacesizeThreshold(autoCreateFacesizeThreshold).
+				SetAutoCreateOnHa(autoCreateOnHa).
+				SetAutoCreateOnJunk(autoCreateOnJunk).
+				SetAutoCheckFaceAngle(autoCheckFaceAngle).
+				SetAutoCheckAngleThreshold(autoCheckAngleThreshold).
+				SetAutoCheckAsm(autoCheckAsm).
+				SetAutoCreateCheckBlur(autoCreateCheckBlur).
+				SetAutoCreateCheckExp(autoCreateCheckExp).
+				SetAutoCheckLiveness(autoCheckLiveness).
+				SetAutoCreateLivenessOnly(autoCreateLivenessOnly).
+				SetManualCreateFacesizeThreshold(manualCreateFacesizeThreshold).
+				SetManualCreateOnHa(manualCreateOnHa).
+				SetManualCreateOnJunk(manualCreateOnJunk).
+				SetManualCheckAsm(manualCheckAsm).
+				SetManualCreateLivenessOnly(manualCreateLivenessOnly).
+				SetManualCheckLiveness(manualCheckLiveness)
+			resp, err := c.Sources().Update(req)
+			ifErrorExit(err)
+			ifErrorExit(utils.PrettyPrint(resp))
+		case sourcesCreate:
+			if sourceName == "" {
+				printAndExit("source name is required")
+			}
+			c, err := client.NewClient()
+			ifErrorExit(err)
+
+			req := source.DefaultSourceWithName(sourceName)
+			req.
+				SetPpsTimestamp(ppsTimestamp).
+				SetStoreImagesForConfs(storeImagesForConfs).
+				SetName(sourceName).
+				SetIdentifyFacesizeThreshold(identifyFacesizeThreshold).
+				SetAutoCreatePersons(autoCreatePerson).
+				SetAutoCreateFacesizeThreshold(autoCreateFacesizeThreshold).
+				SetAutoCreateOnHa(autoCreateOnHa).
+				SetAutoCreateOnJunk(autoCreateOnJunk).
+				SetAutoCheckFaceAngle(autoCheckFaceAngle).
+				SetAutoCheckAngleThreshold(autoCheckAngleThreshold).
+				SetAutoCheckAsm(autoCheckAsm).
+				SetAutoCreateCheckBlur(autoCreateCheckBlur).
+				SetAutoCreateCheckExp(autoCreateCheckExp).
+				SetAutoCheckLiveness(autoCheckLiveness).
+				SetAutoCreateLivenessOnly(autoCreateLivenessOnly).
+				SetManualCreateFacesizeThreshold(manualCreateFacesizeThreshold).
+				SetManualCreateOnHa(manualCreateOnHa).
+				SetManualCreateOnJunk(manualCreateOnJunk).
+				SetManualCheckAsm(manualCheckAsm).
+				SetManualCreateLivenessOnly(manualCreateLivenessOnly).
+				SetManualCheckLiveness(manualCheckLiveness)
+
+			resp, err := c.Sources().Create(req)
+
+			ifErrorExit(err)
+			ifErrorExit(utils.PrettyPrint(resp))
 		}
 	},
 }
@@ -122,21 +187,25 @@ var sourcesCmd = &cobra.Command{
 func init() {
 	sourcesCmd.Flags().StringVarP(&q, "search", "s", "", "filtering of a source sourcesList by partly or fully specified name")
 	sourcesCmd.Flags().IntVar(&sourceId, "id", 0, "source id")
-	//sourcesCmd.Flags().
-	//sourcesCmd.Flags().BoolVar(ppsTimestamp, "ppsTimestamp", nil, "ppsTimestamp")
-	//sourcesCmd.Flags().BoolVar(autoCreatePerson, "autoCreatePerson", nil, "autoCreatePerson")
-	//sourcesCmd.Flags().BoolVar(autoCreateOnHa, "autoCreateOnHa", nil, "autoCreateOnHa")
-	//sourcesCmd.Flags().BoolVar(autoCreateOnJunk, "autoCreateOnJunk", nil, "autoCreateOnJunk")
-	//sourcesCmd.Flags().BoolVar(autoCheckFaceAngel, "autoCheckFaceAngel", nil, "autoCheckFaceAngel")
-	//sourcesCmd.Flags().BoolVar(autoCheckAsm, "autoCheckAsm", nil, "autoCheckAsm")
-	//sourcesCmd.Flags().BoolVar(autoCreateCheckBlur, "autoCreateCheckBlur", nil, "autoCreateCheckBlur")
-	//sourcesCmd.Flags().BoolVar(autoCreateCheckExp, "autoCreateCheckExp", nil, "autoCreateCheckExp")
-	//sourcesCmd.Flags().BoolVar(autoCheckLiveness, "autoCheckLiveness", nil, "autoCheckLiveness")
-	//sourcesCmd.Flags().BoolVar(autoCreateLivenessOnly, "autoCreateLivenessOnly", nil, "autoCreateLivenessOnly")
-	//sourcesCmd.Flags().BoolVar(manualCreateOnHa, "manualCreateOnHa", nil, "manualCreateOnHa")
-	//sourcesCmd.Flags().BoolVar(manualCreateOnJunk, "manualCreateOnJunk", nil, "manualCreateOnJunk")
-	//sourcesCmd.Flags().BoolVar(manualCheckAsm, "manualCheckAsm", nil, "manualCheckAsm")
-	//sourcesCmd.Flags().BoolVar(manualCreateLivenessOnly, "manualCreateLivenessOnly", nil, "manualCreateLivenessOnly")
-	//sourcesCmd.Flags().BoolVar(manualCheckLiveness, "manualCheckLiveness", nil, "manualCheckLiveness")
+	sourcesCmd.Flags().BoolVar(&ppsTimestamp, "ppsTimestamp", false, "ppsTimestamp")
+	sourcesCmd.Flags().BoolVar(&autoCreatePerson, "autoCreatePerson", false, "autoCreatePerson")
+	sourcesCmd.Flags().BoolVar(&autoCreateOnHa, "autoCreateOnHa", false, "autoCreateOnHa")
+	sourcesCmd.Flags().BoolVar(&autoCreateOnJunk, "autoCreateOnJunk", false, "autoCreateOnJunk")
+	sourcesCmd.Flags().BoolVar(&autoCheckFaceAngle, "autoCheckFaceAngle", false, "autoCheckFaceAngel")
+	sourcesCmd.Flags().BoolVar(&autoCheckAsm, "autoCheckAsm", false, "autoCheckAsm")
+	sourcesCmd.Flags().BoolVar(&autoCreateCheckBlur, "autoCreateCheckBlur", false, "autoCreateCheckBlur")
+	sourcesCmd.Flags().BoolVar(&autoCreateCheckExp, "autoCreateCheckExp", false, "autoCreateCheckExp")
+	sourcesCmd.Flags().BoolVar(&autoCheckLiveness, "autoCheckLiveness", false, "autoCheckLiveness")
+	sourcesCmd.Flags().BoolVar(&autoCreateLivenessOnly, "autoCreateLivenessOnly", false, "autoCreateLivenessOnly")
+	sourcesCmd.Flags().BoolVar(&manualCreateOnHa, "manualCreateOnHa", false, "manualCreateOnHa")
+	sourcesCmd.Flags().BoolVar(&manualCreateOnJunk, "manualCreateOnJunk", false, "manualCreateOnJunk")
+	sourcesCmd.Flags().BoolVar(&manualCheckAsm, "manualCheckAsm", false, "manualCheckAsm")
+	sourcesCmd.Flags().BoolVar(&manualCreateLivenessOnly, "manualCreateLivenessOnly", false, "manualCreateLivenessOnly")
+	sourcesCmd.Flags().BoolVar(&manualCheckLiveness, "manualCheckLiveness", false, "manualCheckLiveness")
+	sourcesCmd.Flags().IntVar(&manualCreateFacesizeThreshold, "manualCreateFacesizeThreshold", 0, "manualCreateFacesizeThreshold")
+	sourcesCmd.Flags().IntVar(&identifyFacesizeThreshold, "identifyFacesizeThreshold", 0, "identifyFacesizeThreshold")
+	sourcesCmd.Flags().IntVar(&autoCreateFacesizeThreshold, "autoCreateFacesizeThreshold", 0, "autoCreateFacesizeThreshold")
+	sourcesCmd.Flags().IntVar(&autoCheckAngleThreshold, "autoCheckAngleThreshold", 0, "autoCheckAngleThreshold")
+	sourcesCmd.Flags().StringArrayVar(&storeImagesForConfsStrings, "storeImagesForConfs", []string{}, "storeImagesForConfs")
 	rootCmd.AddCommand(sourcesCmd)
 }
